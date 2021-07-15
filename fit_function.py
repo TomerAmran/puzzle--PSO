@@ -13,22 +13,27 @@ def distance(tile1, tile2):
     distances =   np.abs(predict1 - tile2[:,0])**p + np.abs(predict2 - tile1[:,-1])**p
     return (distances.sum() ** (q/p))
 
-def fit_matrices(tiles):
+def distance_matrices(tiles):
     n = len(tiles)
     H = np.zeros((n,n))
     V = np.zeros((n,n))
     for i in range(n):
         for j in range(n):
-            print(i,j)
-            print(distance(tiles[i], tiles[j]))
             H[i,j] = distance(tiles[i], tiles[j])
-            V[i,j] = distance(tiles[i].T, tiles[j].T)
+            V[i,j] = distance(np.transpose(tiles[i],(1,0,2)), np.transpose(tiles[j],(1,0,2)))
     return H, V
+
+def compability(tiles):
+    n = len(tiles)
+    H, V = distance_matrices(tiles)
+    H , V = -H, -V
+    for i in range(n):
+        H[i,:] = np.exp(H[i,:]) / np.sum(np.exp(H[i,:]))
+        V[i,:] = np.exp(V[i,:]) / np.sum(np.exp(V[i,:]))
+    return H,V
+
 
 if (__name__ == '__main__'):
     ts, h,v = load_image('small.jpeg', shuffle = False)
-    for t in ts:
-        print(t.shape)
-    H,V = fit_matrices(ts)
-    print(H)
+    H,V = compability(ts)
     

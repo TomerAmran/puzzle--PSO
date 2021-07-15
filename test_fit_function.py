@@ -1,9 +1,9 @@
 import numpy as np
-from fit_function import fit_matrices
+from fit_function import distance_matrices
 from load_img import load_image
 
 ts, w ,h = load_image('small.jpeg', shuffle = False)
-H, V = fit_matrices(ts)
+H, V = distance_matrices(ts)
 
 successes = 0
 
