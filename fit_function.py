@@ -1,6 +1,7 @@
+from tile import Tile
 from random import shuffle
 import numpy as np
-from load_img import load_image
+from utils import load_image
 
 p = 3/10
 q = 1 / 16
@@ -13,17 +14,17 @@ def distance(tile1, tile2):
     distances =   np.abs(predict1 - tile2[:,0])**p + np.abs(predict2 - tile1[:,-1])**p
     return (distances.sum() ** (q/p))
 
-def distance_matrices(tiles):
+def distance_matrices(tiles: list[Tile]):
     n = len(tiles)
     H = np.zeros((n,n))
     V = np.zeros((n,n))
     for i in range(n):
         for j in range(n):
-            H[i,j] = distance(tiles[i], tiles[j])
-            V[i,j] = distance(np.transpose(tiles[i],(1,0,2)), np.transpose(tiles[j],(1,0,2)))
+            H[i,j] = distance(tiles[i].tile, tiles[j].tile)
+            V[i,j] = distance(np.transpose(tiles[i].tile,(1,0,2)), np.transpose(tiles[j].tile,(1,0,2)))
     return H, V
 
-def compability(tiles):
+def compability(tiles:list[Tile]):
     n = len(tiles)
     H, V = distance_matrices(tiles)
     H , V = -H, -V
@@ -32,8 +33,3 @@ def compability(tiles):
         V[i,:] = np.exp(V[i,:]) / np.sum(np.exp(V[i,:]))
     return H,V
 
-
-if (__name__ == '__main__'):
-    ts, h,v = load_image('small.jpeg', shuffle = False)
-    H,V = compability(ts)
-    
