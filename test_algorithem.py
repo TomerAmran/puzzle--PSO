@@ -17,14 +17,25 @@ def all_perms(elements):
 def exhaustive_search():
     puzzle = Puzzle('imgs/small.jpeg', TILE_SIZE)
     puzzle.load()
-    ps = []
-    for _ in range(200):
-        t_copy = copy.deepcopy(puzzle.tiles)
-        random.shuffle(t_copy)
-        ps.append(Particle(t_copy))
+    seed = [i for i in range(puzzle.n)]
+    ps = list(all_perms(seed))
+    evs = []
     for p in ps:
-        print(puzzle.evaluate(p.tiles))
-    print(puzzle.evaluate(puzzle.tiles))
+        evs.append(puzzle.evaluate(p))
+    argmin = np.argmin(np.array(evs))
+    min = ps[argmin]
+    print(argmin,min)
+    print(ps)
     return None
+def stupid_serach():
+    puzzle = Puzzle('imgs/small.jpeg', TILE_SIZE)
+    puzzle.load()
+    permutations = [puzzle.get_permutation() for _ in range(1000000)]
+    scores = [puzzle.evaluate(p) for p in permutations]
+    argmax = np.argmax(np.array(scores))
+    max_permutation = permutations[argmax]
+    puzzle.permutation_to_image('stupid.png',max_permutation)
+
 if (__name__ == '__main__'):
-    exhaustive_search()
+    # exhaustive_search()
+    stupid_serach()
