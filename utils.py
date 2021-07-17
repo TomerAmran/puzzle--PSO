@@ -22,17 +22,17 @@ def scatter_plot(coordinates,labels,k, name):
     plt.savefig('{}.png'.format(name))
 
 
-def load_image(path, TILE_SIZE):
+def load_image(path, tile_size=28):
     img = Image.open(path)
-    trimed_height = (img.height // TILE_SIZE) * TILE_SIZE
-    trimed_width = (img.width // TILE_SIZE)* TILE_SIZE
+    trimed_height = (img.height // tile_size) * tile_size
+    trimed_width = (img.width // tile_size)* tile_size
     img.crop((0, trimed_height, 0 , trimed_width))
 
-    data = np.array(img) /255
+    data = np.array(img) /255 # normalize RGB
 
-    [grid_width, grid_height] = [trimed_width// TILE_SIZE, trimed_height//TILE_SIZE]
+    [grid_width, grid_height] = [trimed_width// tile_size, trimed_height//tile_size]
 
-    tiles = [data[i*TILE_SIZE: (i+1)*TILE_SIZE,j*TILE_SIZE: (j+1)*TILE_SIZE] for i in range(grid_height) for j in range(grid_width)]
+    tiles = [data[i*tile_size: (i+1)*tile_size,j*tile_size: (j+1)*tile_size] for i in range(grid_height) for j in range(grid_width)]
 
     return tiles ,grid_height ,grid_width
 

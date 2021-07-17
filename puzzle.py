@@ -15,7 +15,8 @@ class Puzzle:
         self.tiles = [Tile(tile,i) for i,tile in enumerate(tiles) ]
         self.compability_H, self.compability_V = compability(self.tiles)
 
-    def evaluate(self, permutation):
+    def evaluate(self, permutation:list[int]):
+        # TODO : refactor to matrix caclulation
         score = 0
         for i in range(self.n):
             if i%self.w_grid != self.w_grid-1:
@@ -29,8 +30,4 @@ class Puzzle:
         for i in range(self.n):
             tiles.append(self.tiles[permutation[i]])
         return save_image(path,tiles, self.h_grid, self.w_grid)
-        
-    def get_permutation(self):
-        x = [i for i in range(self.n)]
-        random.shuffle(x)  
-        return x
+    

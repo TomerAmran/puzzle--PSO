@@ -7,13 +7,14 @@ import numpy as np
 from typing import Callable
 from sklearn.decomposition import PCA as PCA_FACTORY
 
-W = 0.9
+W = 1
 c1 = 0.8
 c2 = 0.9
 x_min = 0
 x_max = 4
-v_min = -1
-v_max = 1
+v_min = -4
+v_max = 4
+beta = 0.9
 
 
 class Particle():
@@ -38,19 +39,18 @@ class Particle():
 
 class Space():
 
-    def __init__(self, dims, n_particles, fitness: Callable[[Particle],int]):
+    def __init__(self, dims, n_particles, fitness: Callable[[Particle],float]):
         self.dims = dims
         self.n_particles = n_particles
         self.particles: list[Particle] = []
         self.gbest_value = -float('inf')
         self.gbest_position = None
         self.fitness = fitness
+    
     def print_particles(self):
         for particle in self.particles:
             particle.__str__()
    
-        
-
     def set_pbest(self):
         for particle in self.particles:
             fitness_cadidate = self.fitness(particle)
@@ -69,6 +69,7 @@ class Space():
     def move_particles(self):
         for i, particle in enumerate(self.particles):
             global W
+            W *= beta
             g_best_candidates = [self.particles[(i-1)].pbest_position, self.particles[(i+1)%self.dims].pbest_position, particle.pbest_position]
             g_best_candidate_values = [self.particles[i-1].pbest_value, self.particles[(i+1)%self.dims].pbest_value, particle.pbest_value]
             g_best = g_best_candidates[np.argmax(g_best_candidate_values)]
