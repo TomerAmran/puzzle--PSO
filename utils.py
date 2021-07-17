@@ -1,11 +1,28 @@
 from tile import Tile
 from PIL import Image
 import numpy as np
-from constants import TILE_SIZE
 import random
 
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
 
-def load_image(path):
+###
+# plot a scatter plot of coordinates with labels labels
+# the data contain k classes
+###
+def scatter_plot(coordinates,labels,k, name):
+    fig, ax = plt.subplots()
+    for i in range(k):
+        idx = labels == i
+        data = coordinates[:,idx]
+        ax.scatter(data[0],data[1],label=str(i),alpha=0.3,s=10)
+    ax.legend(markerscale=2)
+    plt.savefig('{}.png'.format(name))
+
+
+def load_image(path, TILE_SIZE):
     img = Image.open(path)
     trimed_height = (img.height // TILE_SIZE) * TILE_SIZE
     trimed_width = (img.width // TILE_SIZE)* TILE_SIZE
@@ -19,7 +36,8 @@ def load_image(path):
 
     return tiles ,grid_height ,grid_width
 
-def save_image(path:str, tiles: list[Tile], grid_height: int,grid_width:int, color_dim:int=3):
+def save_image(path:str, tiles: list[Tile], grid_height: int,grid_width:int,color_dim:int=3):
+    TILE_SIZE = tiles[0].tile.shape[0]
     data = np.zeros((grid_height*TILE_SIZE,grid_width*TILE_SIZE,color_dim))
     k = 0
     for i in range(grid_height):
@@ -31,7 +49,8 @@ def save_image(path:str, tiles: list[Tile], grid_height: int,grid_width:int, col
     img.save(path)
     return img
     
-
+def SPV(vector):
+    return np.argsort(vector)
 
 
 if (__name__ == '__main__'):
