@@ -33,7 +33,7 @@ def load_image(path, tile_size=28):
     [grid_width, grid_height] = [trimed_width// tile_size, trimed_height//tile_size]
 
     tiles = [data[i*tile_size: (i+1)*tile_size,j*tile_size: (j+1)*tile_size] for i in range(grid_height) for j in range(grid_width)]
-
+    random.shuffle(tiles)
     return tiles ,grid_height ,grid_width
 
 def save_image(path:str, tiles: list[Tile], grid_height: int,grid_width:int,color_dim:int=3):
