@@ -1,7 +1,5 @@
 import copy
 import random
-from particle import Particle
-from constants import TILE_SIZE
 from puzzle import Puzzle
 import numpy as np
 import itertools

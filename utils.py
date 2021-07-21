@@ -1,4 +1,3 @@
-from tile import Tile
 from PIL import Image
 import numpy as np
 import random
@@ -22,7 +21,7 @@ def scatter_plot(coordinates,labels,k, name):
     plt.savefig('{}.png'.format(name))
 
 
-def load_image(path, tile_size=28):
+def load_image(path, tile_size=28, shuffle=True):
     img = Image.open(path)
     trimed_height = (img.height // tile_size) * tile_size
     trimed_width = (img.width // tile_size)* tile_size
@@ -33,16 +32,17 @@ def load_image(path, tile_size=28):
     [grid_width, grid_height] = [trimed_width// tile_size, trimed_height//tile_size]
 
     tiles = [data[i*tile_size: (i+1)*tile_size,j*tile_size: (j+1)*tile_size] for i in range(grid_height) for j in range(grid_width)]
-    random.shuffle(tiles)
+    if shuffle:
+        random.shuffle(tiles)
     return tiles ,grid_height ,grid_width
 
-def save_image(path:str, tiles: list[Tile], grid_height: int,grid_width:int,color_dim:int=3):
-    TILE_SIZE = tiles[0].tile.shape[0]
+def save_image(path:str, tiles: list[any], grid_height: int,grid_width:int,color_dim:int=3):
+    TILE_SIZE = tiles[0].shape[0]
     data = np.zeros((grid_height*TILE_SIZE,grid_width*TILE_SIZE,color_dim))
     k = 0
     for i in range(grid_height):
         for j in range(grid_width):
-            data[i*TILE_SIZE: (i+1)*TILE_SIZE,j*TILE_SIZE: (j+1)*TILE_SIZE] =  tiles[k].tile
+            data[i*TILE_SIZE: (i+1)*TILE_SIZE,j*TILE_SIZE: (j+1)*TILE_SIZE] =  tiles[k]
             k += 1
     data = (data * 255).astype(np.uint8)
     img = Image.fromarray(data,'RGB')

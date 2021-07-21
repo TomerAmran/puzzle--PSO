@@ -1,11 +1,10 @@
 from PIL.Image import new
 from matplotlib.pyplot import sca
-from constants import TILE_SIZE
 from utils import SPV, scatter_plot
 from puzzle import Puzzle
 import random
 import numpy as np 
-from typing import Callable, Collection
+from typing import Callable
 from sklearn.decomposition import PCA as PCA_FACTORY
 import time
 W = 1
@@ -13,9 +12,9 @@ c1 = 0.8
 c2 = 0.9
 x_min = 0
 x_max = 4
-v_min = -4
-v_max = 4
-beta = 0.99
+v_min = -1
+v_max = 1
+beta = 0.975
 
 
 class Particle():
@@ -92,7 +91,6 @@ class Particle():
             i, j = 0, i
         s = np.copy(position)
         s[i:j+1] = np.roll(s[i:j+1],-1) 
-        loop =0
         for _ in range((j-i)):
             kcount =0
             max_method =2
@@ -143,18 +141,19 @@ class Space():
         global W
         W = W*beta if W>0.4 else 0.4
         for i, particle in enumerate(self.particles):
-            g_best_candidates = [self.particles[(i-1)].pbest_position, self.particles[(i+1)%self.dims].pbest_position, particle.pbest_position]
-            g_best_candidate_values = [self.particles[i-1].pbest_value, self.particles[(i+1)%self.dims].pbest_value, particle.pbest_value]
+            g_best_candidates = [self.particles[(i-1)] .pbest_position, self.particles[(i+1)%len(self.particles)].pbest_position, particle.pbest_position]
+            g_best_candidate_values = [self.particles[i-1].pbest_value, self.particles[(i+1)%len(self.particles)].pbest_value, particle.pbest_value]
             g_best = g_best_candidates[np.argmax(g_best_candidate_values)]
-            new_velocity = (W*particle.velocity) + (1-W)*(c1*random.random()) * (particle.pbest_position - particle.position) + \
-                            (random.random()*c2) * (g_best - particle.position)
+            new_velocity = (W*particle.velocity) + (c1*np.random.rand(self.dims)) * (particle.pbest_position - particle.position) + \
+                            (np.random.rand(self.dims)*c2) * (g_best - particle.position)
             np.clip(new_velocity,v_min, v_max)
             particle.velocity = new_velocity
             particle.move()
             particle.VNS()
     
-    
-
+    def replace_week_particle(self):
+        argmin = np.argmin(map(lambda p: p.fitness(),self.particles))
+        self.particles[argmin] = Particle(self.dims, self.particles[0].fitness)
 
 def fitness_1(position: list[int], puzzle:Puzzle):
     permutation = SPV(position)
@@ -162,17 +161,19 @@ def fitness_1(position: list[int], puzzle:Puzzle):
 
 
 def plot(ps : list[Particle]):
-    data = np.array(list(map(lambda p: SPV(p.position),ps)))
+    # data = np.array(list(map(lambda p: SPV(p.position),ps)))
+    data = np.array(list(map(lambda p: p.position,ps)))
     pca = PCA_FACTORY(n_components=2)
     reduced_data = np.array(pca.fit_transform(data))
     scatter_plot(reduced_data.T, np.zeros(len(ps)),1,'scatter')
 
 def main():
-    # n_iterations = int(input("Inform the number of iterations: "))
-    # n_particles = int(input("Inform the number of particles: "))
+    TILE_SIZE = 20
     n_iterations = 1000
     n_particles = 200
-    puzzle = Puzzle('imgs/small.jpeg',TILE_SIZE//2)
+    PATH = 'imgs/small.jpeg'
+    puzzle = Puzzle(PATH,TILE_SIZE)
+    print('ground trouth',puzzle.ground_trouth_score(PATH, TILE_SIZE))
     puzzle.load()
     dims = puzzle.n
     search_space = Space(dims, n_particles)
@@ -187,7 +188,9 @@ def main():
         search_space.set_gbest()
         print('iteration:{}'.format(iteration),search_space.gbest_value)
         search_space.move_particles()
-        # if iteration%1000 == 0:
+        # search_space.replace_week_particle()
+        # plot(search_space.particles)
+        # if iteration%10 == 0:
         #     puzzle.permutation_to_image('imgs/res{}.png'.format(iteration), SPV(search_space.gbest_position))
         iteration += 1
     print('time:', time.time()-start )   
@@ -196,17 +199,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    exit()
-    max = 0
-    argmax = None
-    puzzle = Puzzle('imgs/small.jpeg',TILE_SIZE//2)
-    puzzle.load()
-    for _ in range(1000000):
-        p=Particle(puzzle.n)
-        fit = fitness_1(p,puzzle) 
-        if fit > max:
-            max = fit
-            argmax = p
-    print(max)
-    puzzle.permutation_to_image('serct.png', SPV(argmax.position))
 
