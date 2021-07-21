@@ -28,8 +28,9 @@ class Puzzle:
         for i in range(self.n):
             tiles.append(self.tiles[permutation[i]])
         return save_image(path,tiles, self.h_grid, self.w_grid)
-    
-    def ground_trouth_score(self, path, tile_size):
+
+    @staticmethod
+    def ground_trouth_score(path, tile_size):
         tiles, h_grid, w_grid = load_image(path, tile_size,shuffle=False) 
         compability_H, compability_V = compability(tiles)
         n = len(tiles)

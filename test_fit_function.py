@@ -1,18 +1,21 @@
 import numpy as np
-from fit_function import distance_matrices
-from load_img import load_image
+from fit_function import compability
+from utils import load_image
 
-ts, w ,h = load_image('small.jpeg', shuffle = False)
-H, V = distance_matrices(ts)
+ts, h, w = load_image('imgs/small.jpeg', tile_size=14, shuffle=False)
+H, V = compability(ts)
 
-successes = 0
+successes_H = 0
 
 for i in range(len(ts)):
-    print(i, np.argmin(H[i,:]))
-    if np.argmin(H[i,:]) == i+1:
-        if i%w != w-1:
-            successes += 1
-
-score = successes / ((w-1)*h)
-print(score)  
-
+    if np.argmax(H[i, :]) == i + 1:
+        if i % w != w - 1:
+            successes_H += 1
+successes_V = 0
+for i in range(len(ts) - w):
+    if np.argmax(V[i, :]) == i + w:
+        successes_V += 1
+score_vertical = successes_V / (w * (h - 1))
+score_horizontal = successes_H / ((w - 1) * h)
+print('horizontal score', score_horizontal)
+print('vertical score', score_vertical)
