@@ -37,10 +37,10 @@ def compability(tiles: list[any]):
     H, V = distance_matrices(tiles)
 
     for i in range(n):
-        q_h = np.sort(H[i, :])[(n // 4) + 1]
+        q_h = np.sort(H[i, :])[(n // 4) +1]
         H[i, :] = np.exp(-H[i, :] / q_h)
         H[i, :] /= np.sum(H[i, :])
-        q_v = np.sort(V[i, :])[(n // 4) + 1]
+        q_v = np.sort(V[i, :])[(n // 4)+1]
         V[i, :] = np.exp(-V[i, :] / q_v)
         V[i, :] /= np.sum(V[i, :])
     return H, V

@@ -1,3 +1,4 @@
+from os import path
 from PIL.Image import new
 from matplotlib.pyplot import sca
 from utils import SPV, scatter_plot
@@ -7,7 +8,7 @@ import numpy as np
 from typing import Callable
 from sklearn.decomposition import PCA as PCA_FACTORY
 import time
-
+from plot_histogram import plot_histogram
 W = 1
 c1 = 0.8
 c2 = 0.9
@@ -15,7 +16,7 @@ x_min = 0
 x_max = 4
 v_min = -1
 v_max = 1
-beta = 0.975
+beta = 0.999
 
 
 class Particle:
@@ -35,7 +36,7 @@ class Particle:
         new_position = np.clip(new_position, x_min, x_max)
         self.position = new_position
 
-    def get_fintness(self):
+    def get_fitness(self):
         return self.fitness(self.position)
 
     def VNS(self):
@@ -83,14 +84,14 @@ class Space():
 
     def set_pbest(self):
         for particle in self.particles:
-            fitness_cadidate = particle.get_fintness()
+            fitness_cadidate = particle.get_fitness()
             if (fitness_cadidate > particle.pbest_value):
                 particle.pbest_value = fitness_cadidate
                 particle.pbest_position = particle.position
 
     def set_gbest(self):
         for particle in self.particles:
-            best_fitness_cadidate = particle.get_fintness()
+            best_fitness_cadidate = particle.get_fitness()
             if (best_fitness_cadidate > self.gbest_value):
                 self.gbest_value = best_fitness_cadidate
                 self.gbest_position = particle.position
@@ -113,7 +114,7 @@ class Space():
             particle.VNS()
 
     def replace_week_particle(self):
-        argmin = np.argmin(map(lambda p: p.fitness(), self.particles))
+        argmin = np.argmin([p.get_fitness() for p in  self.particles])
         self.particles[argmin] = Particle(self.dims, self.particles[0].fitness)
 
 
@@ -131,13 +132,19 @@ def plot(ps: list[Particle]):
 
 
 def main():
-    TILE_SIZE = 14
-    n_iterations = 3000
-    n_particles = 400
-    PATH = 'imgs/small.jpeg'
+    TILE_SIZE = 50
+    n_iterations = 500
+    n_particles = 200
+    img_name = 'shapes3.jpeg'
+    PATH = 'imgs/' + img_name
+    score_histogram = []
+
     puzzle = Puzzle(PATH, TILE_SIZE)
-    print('ground trouth', Puzzle.ground_trouth_score(PATH, TILE_SIZE))
+    print('main')
+    ground_truth = Puzzle.ground_trouth_score(PATH, TILE_SIZE)
+    print('ground trouth', ground_truth)
     puzzle.load()
+    print('grid size' , 'm:{}, n:{}'.format(puzzle.h_grid,puzzle.w_grid))
     dims = puzzle.n
     search_space = Space(dims, n_particles)
     fitness = lambda position: fitness_1(position, puzzle)
@@ -145,17 +152,27 @@ def main():
     search_space.particles = particles_vector
 
     iteration = 0
+    print('starting')
     start = time.time()
-    while (iteration < n_iterations):
+    while (iteration < n_iterations and search_space.gbest_value < ground_truth):
         search_space.set_pbest()
         search_space.set_gbest()
         print('iteration:{}'.format(iteration), search_space.gbest_value)
+        score_histogram.append(search_space.gbest_value)
         search_space.move_particles()
+        if ( iteration % 50 ==0):
+            for _ in range(20):
+                search_space.replace_week_particle()
+                
         # search_space.replace_week_particle()
+        # search_space.replace_week_particle()
+       
         # plot(search_space.particles)
         if iteration%500 == 0:
             puzzle.permutation_to_image('imgs/res{}.png'.format(iteration), SPV(search_space.gbest_position))
         iteration += 1
+    plot_histogram(score_histogram,n_particles,ground_truth, puzzle.h_grid,puzzle.w_grid,img_name)
+
     print('time:', time.time() - start)
     print("The best solution is: ", search_space.gbest_position)
     puzzle.permutation_to_image('imgs/res.png', SPV(search_space.gbest_position))
