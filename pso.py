@@ -16,7 +16,7 @@ x_min = 0
 x_max = 4
 v_min = -1
 v_max = 1
-beta = 0.999
+beta = 0.975
 
 
 class Particle:
@@ -100,11 +100,6 @@ class Space():
         global W
         W = max(W*beta, 0.4)
         for i, particle in enumerate(self.particles):
-            # g_best_candidates = [self.particles[(i - 1)].pbest_position,
-            #                      self.particles[(i + 1) % len(self.particles)].pbest_position, particle.pbest_position]
-            # g_best_candidate_values = [self.particles[i - 1].pbest_value,
-            #                            self.particles[(i + 1) % len(self.particles)].pbest_value, particle.pbest_value]
-            # g_best = g_best_candidates[np.argmax(g_best_candidate_values)]
             new_velocity = (W * particle.velocity) + (c1 * random.random()) * (
                     particle.pbest_position - particle.position) + \
                            (random.random() * c2) * (self.gbest_position - particle.position)
@@ -131,52 +126,51 @@ def plot(ps: list[Particle]):
     scatter_plot(reduced_data.T, np.zeros(len(ps)), 1, 'scatter')
 
 
-def main():
-    TILE_SIZE = 50
-    n_iterations = 500
-    n_particles = 200
-    img_name = 'shapes3.jpeg'
-    PATH = 'imgs/' + img_name
-    score_histogram = []
 
+
+
+def pso(TILE_SIZE = 28,n_iterations = 500,img_name = 'shapes_mid'):
+    PATH = 'imgs/' + img_name + '.jpg'
+    score_histogram = []
     puzzle = Puzzle(PATH, TILE_SIZE)
-    print('main')
     ground_truth = Puzzle.ground_trouth_score(PATH, TILE_SIZE)
     print('ground trouth', ground_truth)
     puzzle.load()
     print('grid size' , 'm:{}, n:{}'.format(puzzle.h_grid,puzzle.w_grid))
+    number_of_pieces= puzzle.h_grid*puzzle.w_grid
+    number_of_particles = number_of_pieces *4
+    
+    print('number of pices: ', number_of_pieces)
+    print('number of particles:', number_of_particles)
     dims = puzzle.n
-    search_space = Space(dims, n_particles)
+    search_space = Space(dims, number_of_particles)
     fitness = lambda position: fitness_1(position, puzzle)
-    particles_vector: list[Particle] = [Particle(dims, fitness) for _ in range(n_particles)]
+    particles_vector: list[Particle] = [Particle(dims, fitness) for _ in range(number_of_particles)]
     search_space.particles = particles_vector
 
     iteration = 0
     print('starting')
     start = time.time()
+    puzzle.permutation_to_image('imgs/random_'+img_name +'_' +str(number_of_pieces)+'.png', SPV(particles_vector[0].position))
     while (iteration < n_iterations and search_space.gbest_value < ground_truth):
         search_space.set_pbest()
         search_space.set_gbest()
         print('iteration:{}'.format(iteration), search_space.gbest_value)
         score_histogram.append(search_space.gbest_value)
         search_space.move_particles()
-        if ( iteration % 50 ==0):
-            for _ in range(20):
+        if ( iteration % 5 ==0):
+            for _ in range(int(number_of_particles*0.1)):
                 search_space.replace_week_particle()
-                
-        # search_space.replace_week_particle()
-        # search_space.replace_week_particle()
-       
-        # plot(search_space.particles)
-        if iteration%500 == 0:
-            puzzle.permutation_to_image('imgs/res{}.png'.format(iteration), SPV(search_space.gbest_position))
         iteration += 1
-    plot_histogram(score_histogram,n_particles,ground_truth, puzzle.h_grid,puzzle.w_grid,img_name)
 
-    print('time:', time.time() - start)
+    elapsed_time =time.time() - start
+    plot_histogram(score_histogram,number_of_particles,ground_truth, puzzle.h_grid,puzzle.w_grid,elapsed_time,img_name)
+    print('time:', elapsed_time)
     print("The best solution is: ", search_space.gbest_position)
-    puzzle.permutation_to_image('imgs/res.png', SPV(search_space.gbest_position))
+    puzzle.permutation_to_image('imgs/res_'+img_name +'_' +str(number_of_pieces)+'.png', SPV(search_space.gbest_position))
 
+def main():
+    pso(TILE_SIZE=50)
 
 if __name__ == '__main__':
     main()

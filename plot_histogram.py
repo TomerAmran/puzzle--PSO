@@ -6,9 +6,12 @@ import numpy as np
 
 
 
-def plot_histogram(score_histogram,n_particles,ground_truth,m,n,img_name):
+def plot_histogram(score_histogram,n_particles,ground_truth,m,n,elapsed_time,img_name):
+    number_of_pices = m*n
     plt.plot(score_histogram)
-    name = img_name + " m:" + str(m) + "n:" + str(n) + " np:" + str(n_particles)  +'\n'+ "ground truth:" + str(ground_truth)
+    plt.plot(np.ones(len(score_histogram))*ground_truth)
+    plt.legend(['histogram score','target score'], loc='upper left')
+    name = img_name + " pieces: " + str(number_of_pices) + " np:" + str(n_particles)  +'\n'+ "ground truth:" + str(ground_truth) + ' time:' +str(elapsed_time)
     plt.title(name)
     plt.ylabel(' score')
     plt.xlabel(' iteration')

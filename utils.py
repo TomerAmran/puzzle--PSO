@@ -21,7 +21,7 @@ def scatter_plot(coordinates,labels,k, name):
     plt.savefig('{}.png'.format(name))
 
 
-def load_image(path, tile_size=28, shuffle=True):
+def load_image(path, tile_size=28, shuffle=False):
     img = Image.open(path)
     trimed_height = (img.height // tile_size) * tile_size
     trimed_width = (img.width // tile_size)* tile_size
