@@ -129,8 +129,8 @@ def plot(ps: list[Particle]):
 
 
 
-def pso(TILE_SIZE = 28,n_iterations = 500,img_name = 'shapes_mid'):
-    PATH = 'imgs/' + img_name + '.jpg'
+def pso(TILE_SIZE = 28,n_iterations = 500,img_name = 'sample'):
+    PATH = 'imgs/' + img_name + '.png'
     score_histogram = []
     puzzle = Puzzle(PATH, TILE_SIZE)
     ground_truth = Puzzle.ground_trouth_score(PATH, TILE_SIZE)
@@ -170,7 +170,7 @@ def pso(TILE_SIZE = 28,n_iterations = 500,img_name = 'shapes_mid'):
     puzzle.permutation_to_image('imgs/res_'+img_name +'_' +str(number_of_pieces)+'.png', SPV(search_space.gbest_position))
 
 def main():
-    pso(TILE_SIZE=50)
+    pso(TILE_SIZE=140)
 
 if __name__ == '__main__':
     main()
